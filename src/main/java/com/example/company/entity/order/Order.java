@@ -13,6 +13,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.HashSet;
 import java.util.Set;
 
 
@@ -56,7 +57,9 @@ public class Order {
     private Customer customer;
 
 
-    @ManyToMany(mappedBy = "orders")
-    private Set<Employee> employees;
+    @ManyToMany(mappedBy = "orders", fetch=FetchType.LAZY, cascade = CascadeType.ALL)
+    private Set<Employee> employees = new HashSet<>();
+
+
 
 }

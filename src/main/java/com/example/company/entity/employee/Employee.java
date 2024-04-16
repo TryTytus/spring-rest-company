@@ -43,7 +43,7 @@ public class Employee  {
     private String profession;
 
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.ALL, fetch=FetchType.LAZY)
     @JoinTable(
             name = "employee_order",
             joinColumns = @JoinColumn(name = "employee_id", referencedColumnName = "id"),

@@ -11,12 +11,15 @@ import com.example.company.entity.order.OrderRepo;
 import com.example.company.entity.product.Product;
 import com.example.company.entity.product.ProductRepo;
 import com.github.javafaker.Faker;
+import jakarta.el.LambdaExpression;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.function.Function;
 
 
 @AllArgsConstructor
@@ -27,34 +30,17 @@ public class FakeDataOnStartup implements ApplicationRunner {
     private CompanyRepo companyRepo;
     private ProductRepo productRepo;
     private CustomerRepo customerRepo;
-    private OrderRepo orderRepo;
-
 
 
     @Override
+    @Transactional
     public void run(ApplicationArguments args) throws Exception {
         Faker faker = new Faker();
 
-
-        for (int i = 0; i < 30; i++) {
-
-        employeeRepo.save(
-                Employee.builder()
-                        .firstName(faker.name().firstName())
-                        .lastName(faker.name().lastName())
-                        .email(faker.internet().emailAddress())
-                        .address(faker.address().streetAddress())
-                        .profession(faker.company().profession())
-                        .number(faker.phoneNumber().phoneNumber())
-
-                        .build()
-                );
-
-        }
-
+        List<Company> companies = new ArrayList<>();
 
         for (int i = 0; i < 20; i++) {
-            companyRepo.save(
+            companies.add(
                     Company.builder()
                             .name(faker.company().name())
                             .industry(faker.company().industry())
@@ -64,9 +50,12 @@ public class FakeDataOnStartup implements ApplicationRunner {
             );
         }
 
+        companyRepo.saveAll(companies);
+
+        List<Product> products = new ArrayList<>();
 
         for (int i = 0; i < 100; i++) {
-            productRepo.save(
+            products.add(
                     Product.builder()
                             .name(faker.commerce().productName())
                             .color(faker.color().name())
@@ -76,21 +65,13 @@ public class FakeDataOnStartup implements ApplicationRunner {
             );
         }
 
+        productRepo.saveAll(products);
+
+        ArrayList<Customer> customers = new ArrayList<>();
+
         for (int i = 0; i < 20; i++) {
-            List<Order> orderList = new ArrayList<>();
 
-            for (int j = 0; j < faker.number().numberBetween(1, 3); j++) {
-                orderList.add(Order.builder()
-                        .quantity(faker.number().numberBetween(1, 20))
-                        .status(faker.options().option("READY", "PROCESSED", "CONFIRMED"))
-                        .description(String.join(" ", faker.lorem().words(4)))
-                        .discount(faker.number().numberBetween(10, 30))
-                        .build()
-                );
-            }
-
-
-            Customer customer = Customer.builder()
+            customers.add(Customer.builder()
                     .firstName(faker.name().firstName())
                     .lastName(faker.name().lastName())
                     .email(faker.internet().emailAddress())
@@ -100,35 +81,51 @@ public class FakeDataOnStartup implements ApplicationRunner {
                     .postCode(faker.address().zipCode())
                     .street(faker.address().streetName())
                     .streetNumber(faker.address().streetAddressNumber())
-                    .build();
+                    .build());
+        }
 
-            orderList.forEach(
-                    order -> {order.setCustomer(customer);}
-                    );
+        Iterable<Customer> savedCustomers = customerRepo.saveAll(customers);
+        Iterator<Customer> iterator1 = savedCustomers.iterator();
 
-            customer.setOrders(orderList);
 
-            customerRepo.save(customer);
+        List<Employee> employees = new ArrayList<>();
 
-//           List<Order> orders = new ArrayList<>();
-//           orderRepo.findAll().forEach(orders::add);
-//
-//
-//            Iterable<Employee> employees = employeeRepo.findAll();
-//
-//            employees.forEach( empl ->
-//                    empl.setOrders(new HashSet<>(){{
-//                            add(orders.get(faker.number().numberBetween(0, orders.size() - 1)));
-//                            add(orders.get(faker.number().numberBetween(0, orders.size() - 1)));
-//                    }}));
-//
-//            employeeRepo.saveAll(employees);
+        for (int i = 0; i < 30; i++) {
+
+            employees.add(
+                    Employee.builder()
+                            .firstName(faker.name().firstName())
+                            .lastName(faker.name().lastName())
+                            .email(faker.internet().emailAddress())
+                            .address(faker.address().streetAddress())
+                            .profession(faker.company().profession())
+                            .number(faker.phoneNumber().phoneNumber())
+                            .build()
+            );
         }
 
 
+        for (Employee employee : employees) {
+            employee.setOrders(new HashSet<>());
 
 
-        
+            for (int i = 0; i < faker.number().numberBetween(1, 3); i++) {
+                if (!iterator1.hasNext())
+                    iterator1 = savedCustomers.iterator();
+
+                employee.getOrders().add(
+                        Order.builder()
+                                .quantity(faker.number().numberBetween(1, 20))
+                                .status(faker.options().option("READY", "PROCESSED", "CONFIRMED"))
+                                .description(String.join(" ", faker.lorem().words(4)))
+                                .discount(faker.number().numberBetween(10, 30))
+                                .customer(iterator1.next())
+                                .build()
+                );
+            }
+
+        }
+        employeeRepo.saveAll(employees);
 
 
     }

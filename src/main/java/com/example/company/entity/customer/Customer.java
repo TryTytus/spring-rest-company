@@ -10,7 +10,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "customer")
@@ -46,6 +48,6 @@ public class Customer {
     private String postCode;
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
-    List<Order> orders = new ArrayList<>();
+    Set<Order> orders = new HashSet<>();
 
 }
