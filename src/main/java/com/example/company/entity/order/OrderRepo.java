@@ -14,20 +14,4 @@ public interface OrderRepo extends
         PagingAndSortingRepository<Order, Long>
 {
 
-////    @Modifying
-//    @RestResource(exported = false)
-////    @Transactional
-//    @Query(value =
-//            "TRUNCATE TABLE _order_; alter table _order_  drop foreign key customer_order; ",
-//            nativeQuery = true)
-//    void truncate1();
-//
-//    @RestResource(exported = false)
-//    @Query(value =
-//            "TRUNCATE TABLE customer;  alter table if exists _order_ add constraint customer_order foreign key (customer_id) references customer (id);",
-//            nativeQuery = true)
-//    void truncate2();
-
-
-
 }

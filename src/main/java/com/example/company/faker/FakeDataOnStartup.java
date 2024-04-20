@@ -33,7 +33,6 @@ public class FakeDataOnStartup implements ApplicationRunner {
 
 
     @Override
-    @Transactional
     public void run(ApplicationArguments args) throws Exception {
         Faker faker = new Faker();
 
@@ -51,21 +50,6 @@ public class FakeDataOnStartup implements ApplicationRunner {
         }
 
         companyRepo.saveAll(companies);
-
-        List<Product> products = new ArrayList<>();
-
-        for (int i = 0; i < 100; i++) {
-            products.add(
-                    Product.builder()
-                            .name(faker.commerce().productName())
-                            .color(faker.color().name())
-                            .price(faker.number().numberBetween(1_0000, 1000_000))
-                            .count(faker.number().numberBetween(5, 200))
-                            .build()
-            );
-        }
-
-        productRepo.saveAll(products);
 
         ArrayList<Customer> customers = new ArrayList<>();
 
@@ -85,7 +69,25 @@ public class FakeDataOnStartup implements ApplicationRunner {
         }
 
         Iterable<Customer> savedCustomers = customerRepo.saveAll(customers);
-        Iterator<Customer> iterator1 = savedCustomers.iterator();
+        Iterator<Customer> customerIterator = savedCustomers.iterator();
+
+
+        List<Product> products = new ArrayList<>();
+
+        for (int i = 0; i < 100; i++) {
+            products.add(
+                    Product.builder()
+                            .name(faker.commerce().productName())
+                            .color(faker.color().name())
+                            .price(faker.number().numberBetween(1_0000, 1000_000))
+                            .count(faker.number().numberBetween(5, 200))
+                            .build()
+            );
+        }
+
+        Iterable<Product> productIterable =  productRepo.saveAll(products);
+        Iterator<Product> productIterator = productIterable.iterator();
+
 
 
         List<Employee> employees = new ArrayList<>();
@@ -105,13 +107,17 @@ public class FakeDataOnStartup implements ApplicationRunner {
         }
 
 
+
+
         for (Employee employee : employees) {
             employee.setOrders(new HashSet<>());
 
 
             for (int i = 0; i < faker.number().numberBetween(1, 3); i++) {
-                if (!iterator1.hasNext())
-                    iterator1 = savedCustomers.iterator();
+                if (!customerIterator.hasNext())
+                    customerIterator = savedCustomers.iterator();
+                if (!productIterator.hasNext())
+                    productIterator = productIterable.iterator();
 
                 employee.getOrders().add(
                         Order.builder()
@@ -119,7 +125,8 @@ public class FakeDataOnStartup implements ApplicationRunner {
                                 .status(faker.options().option("READY", "PROCESSED", "CONFIRMED"))
                                 .description(String.join(" ", faker.lorem().words(4)))
                                 .discount(faker.number().numberBetween(10, 30))
-                                .customer(iterator1.next())
+                                .customer(customerIterator.next())
+                                .product(productIterator.next())
                                 .build()
                 );
             }

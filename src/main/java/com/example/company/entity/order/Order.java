@@ -2,6 +2,7 @@ package com.example.company.entity.order;
 
 import com.example.company.entity.customer.Customer;
 import com.example.company.entity.employee.Employee;
+import com.example.company.entity.product.Product;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
@@ -54,12 +55,19 @@ public class Order {
             referencedColumnName = "id",
             foreignKey = @ForeignKey(name = "customer_order")
     )
+
     private Customer customer;
 
+    @ManyToOne
+    @JoinColumn(
+            name = "product_id",
+            referencedColumnName = "id"
+    )
 
-    @ManyToMany(mappedBy = "orders", fetch=FetchType.LAZY, cascade = CascadeType.ALL)
+    private Product product;
+
+
+    @ManyToMany(mappedBy = "orders", fetch=FetchType.LAZY)
     private Set<Employee> employees = new HashSet<>();
-
-
 
 }
