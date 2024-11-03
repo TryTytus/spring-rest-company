@@ -1,6 +1,7 @@
 package com.example.company.entity.employee;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
 
 import lombok.AllArgsConstructor;
@@ -15,6 +16,8 @@ import java.util.List;
 public class EmployeeDao {
 
     private EntityManager em;
+
+
 
 
     List<Object[]> getEmployeeByOrderNum() {
@@ -53,9 +56,6 @@ public class EmployeeDao {
 
         return em.createQuery(cq).getResultList();
     }
-
-
-
 
 
 

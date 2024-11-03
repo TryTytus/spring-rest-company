@@ -2,12 +2,12 @@ package com.example.company.entity.customer;
 
 
 import com.example.company.entity.order.Order;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.hibernate.annotations.BatchSize;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -16,10 +16,15 @@ import java.util.Set;
 
 @Entity
 @Table(name = "customer")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@NamedEntityGraph(
+        name = "Customer.orders",
+        attributeNodes = { @NamedAttributeNode("orders") }
+)
 public class Customer {
 
     @Id
@@ -47,7 +52,9 @@ public class Customer {
     @NotNull
     private String postCode;
 
-    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
+
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JsonManagedReference
     Set<Order> orders = new HashSet<>();
 
 }
